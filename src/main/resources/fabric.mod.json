@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "musheor",
+  "version": "${version}",
+  "name": "Musheor",
+  "description": "Based meteor addon",
+  "authors": [
+    "musheck"
+  ],
+  "contact": {
+    "homepage": "https://musheck.dev"
+  },
+  "icon": "assets/template/icon.png",
+  "environment": "*",
+  "accessWidener": "musheor.accesswidener",
+  "entrypoints": {
+    "meteor": [
+      "musheor.musheor"
+    ]
+  },
+  "mixins": [
+    "musheor.mixins.json"
+  ],
+  "custom": {
+    "meteor-client:color": "200,69,255"
+  },
+  "depends": {
+    "java": ">=21",
+    "minecraft": [
+      "1.21.11"
+    ],
+    "meteor-client": "*"
+  }
+}

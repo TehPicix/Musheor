@@ -1,0 +1,67 @@
+name: Build and release
+
+# Every branch push builds the mod and publishes it as a GitHub release. Tag pushes are excluded so
+# the tags this workflow creates never trigger another run.
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_NUMBER: ${{ github.run_number }}
+          BRANCH: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          version=$(sed -n 's/^mod_version=//p' gradle.properties | tr -d '\r')
+          tag="v${version}-build.${RUN_NUMBER}"
+          jar="musheor-${version}-build.${RUN_NUMBER}.jar"
+          cp "build/libs/musheor-${version}.jar" "$jar"
+
+          {
+            echo "Automated build of \`${GITHUB_SHA::7}\` on \`${BRANCH}\`."
+            echo
+            printf '%s\n' "$COMMIT_MESSAGE"
+          } > release-notes.md
+
+          flags=()
+          if [ "$BRANCH" != "$DEFAULT_BRANCH" ]; then
+            flags+=(--prerelease)
+          fi
+
+          # A re-run of the same workflow run reuses its run number: replace the jar on that release.
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$jar" --clobber
+          else
+            gh release create "$tag" "$jar" \
+              --target "$GITHUB_SHA" \
+              --title "Musheor ${version} build ${RUN_NUMBER}" \
+              --notes-file release-notes.md \
+              "${flags[@]}"
+          fi

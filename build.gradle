@@ -1,0 +1,80 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${project.loom_version}"
+    }
+}
+
+apply plugin: 'fabric-loom'
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.meteordev.org/releases' }
+    maven { url = 'https://maven.meteordev.org/snapshots' }
+    exclusiveContent {
+        forRepository { maven { url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/musheor.accesswidener')
+    mixin {
+        // The shipped jar was remapped statically (Fabric-Loom-Mixin-Remap-Type: static)
+        useLegacyMixinAp = false
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // Compile-only mods, non-transitive so only what the addon references is pulled in.
+    // Litematica, malilib and XaeroPlus were built with Loom 1.16/1.17, hence Loom >= 1.17 here.
+    modCompileOnly("meteordevelopment:meteor-client:${project.meteor_version}") { transitive = false }
+    modCompileOnly("meteordevelopment:baritone:${project.baritone_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:xaeros-minimap:${project.xaero_minimap_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:xaeros-world-map:${project.xaero_worldmap_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:xaeroplus:${project.xaeroplus_version}") { transitive = false }
+    // 0.26.12 rather than newer: the shipped bytecode calls FileType.fromFile(java.io.File),
+    // which Litematica 0.26.16 no longer has (only fromFile(Path)).
+    modCompileOnly("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+    // Libraries Meteor ships as jar-in-jar (its event bus and Discord RPC)
+    compileOnly "meteordevelopment:orbit:${project.orbit_version}"
+    compileOnly "meteordevelopment:discord-ipc:${project.discord_ipc_version}"
+
+    // Bundled as jar-in-jar in the original (META-INF/jars/Java-WebSocket-1.5.4.jar); unused by this jar's code
+    include(implementation('org.java-websocket:Java-WebSocket:1.5.4'))
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = 21
+    it.options.compilerArgs += ['-Xmaxerrs', '5000']
+}
+
+java {
+    // JDK 21's javac reproduces the original's codegen more closely than newer compilers
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}

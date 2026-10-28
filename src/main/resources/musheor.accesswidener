@@ -1,0 +1,14 @@
+accessWidener	v2	named
+accessible	method	net/minecraft/client/network/ClientPlayerInteractionManager	sendSequencedPacket	(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V
+accessible	field	net/minecraft/client/gui/hud/PlayerListHud	ENTRY_ORDERING	Ljava/util/Comparator;
+accessible	field	net/minecraft/entity/player/PlayerInventory	main	Lnet/minecraft/util/collection/DefaultedList;
+accessible	field	net/minecraft/entity/player/PlayerInventory	selectedSlot	I
+mutable	field	net/minecraft/entity/player/PlayerInventory	selectedSlot	I
+accessible	field	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket	entityId	I
+mutable	field	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket	entityId	I
+accessible	class	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
+accessible	class	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
+accessible	class	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractHandler
+accessible	method	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler	<init>	(Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/Vec3d;)V
+accessible	method	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractHandler	<init>	(Lnet/minecraft/util/Hand;)V
+accessible	method	net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket	<init>	(IZLnet/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler;)V
